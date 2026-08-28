@@ -6,16 +6,31 @@
     <div class="absolute inset-0 bg-[linear-gradient(to_right,#fbcfe8_1px,transparent_1px),linear-gradient(to_bottom,#fbcfe8_1px,transparent_1px)] bg-[size:2rem_2rem] opacity-50"></div>
 </div>
 
+<!-- Auto-Disappearing Success Pop-up -->
+@if (session('success'))
+    <div id="success-toast" class="fixed top-10 right-10 bg-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl transition-all duration-500 z-50 flex items-center space-x-3 transform translate-x-0 opacity-100">
+        <div class="bg-emerald-600/50 p-1.5 rounded-full">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+        <span class="font-medium tracking-wide">{{ session('success') }}</span>
+    </div>
+@endif
+
 <!-- Main Content Wrapper -->
 <div class="w-full min-h-screen pt-28 pb-12 px-4 sm:px-6 lg:px-8 relative z-0">
     
-    <!-- Reusable Modal -->
+    <!-- Reusable Modal (Now with Image Support) -->
     <div id="studentModal" class="fixed inset-0 z-50 hidden bg-gray-900/50 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 border-2 border-pink-200" id="modalContent">
             <div class="h-3 bg-gradient-to-r from-pink-400 via-rose-500 to-pink-600"></div>
             <div class="p-8">
                 <div class="flex justify-between items-start mb-6">
-                    <h3 class="text-2xl font-bold text-gray-900" id="modalName">Student Name</h3>
+                    <div class="flex items-center space-x-4">
+                        <img id="modalImage" src="" alt="Profile" class="w-16 h-16 rounded-full object-cover border-2 border-pink-300 shadow-sm hidden">
+                        <h3 class="text-2xl font-bold text-gray-900" id="modalName">Student Name</h3>
+                    </div>
                     <button onclick="closeModal()" class="text-gray-400 hover:text-rose-500 transition-colors">
                         <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
@@ -81,11 +96,16 @@
                         </thead>
                         <tbody class="text-gray-800 font-medium">
                             @foreach($registrations as $student)
-                            <!-- Clickable Row -->
+                            <!-- Clickable Row Passing Real Data Including Profile Picture -->
                             <tr class="border-b border-pink-100 hover:bg-pink-100/50 transition-colors cursor-pointer"
-                                onclick="openModal('{{ $student->student_id }}', '{{ $student->first_name }} {{ $student->last_name }}', '{{ $student->program }} - Year {{ $student->year_level }}', '{{ $student->email }}', '{{ $student->mobile_number }}')">
+                                onclick="openModal('{{ $student->student_id }}', '{{ $student->first_name }} {{ $student->last_name }}', '{{ $student->program }} - Year {{ $student->year_level }}', '{{ $student->email }}', '{{ $student->mobile_number }}', '{{ asset('storage/' . $student->profile_picture) }}')">
                                 <td class="p-4">{{ $student->student_id }}</td>
-                                <td class="p-4">{{ $student->first_name }} {{ $student->last_name }}</td>
+                                <td class="p-4">
+                                    <div class="flex items-center space-x-3">
+                                        <img src="{{ asset('storage/' . $student->profile_picture) }}" class="w-8 h-8 rounded-full object-cover shadow-sm">
+                                        <span>{{ $student->first_name }} {{ $student->last_name }}</span>
+                                    </div>
+                                </td>
                                 <td class="p-4">{{ $student->program }}</td>
                                 <td class="p-4 text-right">
                                     <span class="text-white font-bold text-xs bg-pink-500 hover:bg-pink-600 px-4 py-2 rounded-full shadow-md transition-colors">View Details</span>
@@ -103,13 +123,19 @@
 <script>
     const modal = document.getElementById('studentModal');
     const modalContent = document.getElementById('modalContent');
+    const modalImg = document.getElementById('modalImage');
 
-    function openModal(id, name, program, email, mobile) {
+    function openModal(id, name, program, email, mobile, imageSrc) {
         document.getElementById('modalId').innerText = id;
         document.getElementById('modalName').innerText = name;
         document.getElementById('modalProgram').innerText = program;
         document.getElementById('modalEmail').innerText = email;
         document.getElementById('modalMobile').innerText = mobile;
+        
+        if (imageSrc) {
+            modalImg.src = imageSrc;
+            modalImg.classList.remove('hidden');
+        }
 
         modal.classList.remove('hidden');
         setTimeout(() => {
@@ -123,7 +149,27 @@
         modalContent.classList.add('scale-95');
         setTimeout(() => {
             modal.classList.add('hidden');
+            modalImg.src = '';
+            modalImg.classList.add('hidden');
         }, 300); 
     }
+
+    // Auto-Disappearing Toast Logic
+    document.addEventListener('DOMContentLoaded', function() {
+        const successToast = document.getElementById('success-toast');
+        
+        if (successToast) {
+            // Wait 4 seconds, then start the slide-out and fade-out animation
+            setTimeout(() => {
+                successToast.classList.remove('translate-x-0', 'opacity-100');
+                successToast.classList.add('translate-x-full', 'opacity-0');
+                
+                // Wait for the CSS transition (500ms) to finish before removing from DOM
+                setTimeout(() => {
+                    successToast.remove();
+                }, 500);
+            }, 4000); 
+        }
+    });
 </script>
 @endsection
