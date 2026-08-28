@@ -89,7 +89,7 @@
                     </div>
 
                     <div>
-                        <label for="dob" class="block text-sm font-bold text-gray-700">Date of Birth (18+) <span class="text-pink-500">*</span></label>
+                        <label for="dob" class="block text-sm font-bold text-gray-700">Date of Birth <span class="text-pink-500">*</span></label>
                         <input type="date" name="dob" id="dob" required value="{{ old('dob') }}"
                                class="mt-1 block w-full rounded-xl border-2 border-pink-400 shadow-sm bg-white py-2.5 px-3.5 text-sm transition-all duration-200 focus:border-pink-600 focus:ring-4 focus:ring-pink-400/20 outline-none font-medium text-gray-800">
                     </div>
